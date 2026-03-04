@@ -1,4 +1,4 @@
-import React, { useState, useEffect, MouseEvent, useRef } from 'react';
+import React, { Component, useState, useEffect, MouseEvent, useRef } from 'react';
 
 interface HistoryItem {
   expr: string;
@@ -49,13 +49,12 @@ const AdBanner = () => {
   );
 };
 
-class ErrorBoundary extends (React.Component as any) {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false };
-  }
+class ErrorBoundary extends (Component as any) {
+  state = { hasError: false };
   static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch(error: any, errorInfo: any) { console.error("App Crash:", error, errorInfo); }
+  componentDidCatch(error: any, errorInfo: any) { 
+    console.error("App Crash:", error, errorInfo); 
+  }
   render() {
     if (this.state.hasError) {
       return (
@@ -64,9 +63,12 @@ class ErrorBoundary extends (React.Component as any) {
           <p className="text-gray-400 mb-8">The application encountered an unexpected error.</p>
           <button 
             className="px-6 py-3 bg-[#c9ff47] text-black font-bold rounded-full"
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }}
           >
-            Restart Application
+            Reset & Restart
           </button>
         </div>
       );
@@ -97,7 +99,11 @@ function Calculator() {
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('calcHv4') || '[]');
-      setHistory(saved);
+      if (Array.isArray(saved)) {
+        setHistory(saved);
+      } else {
+        setHistory([]);
+      }
     } catch (e) {
       setHistory([]);
     }
@@ -351,7 +357,7 @@ function Calculator() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#0c0c12]">
+    <div className="flex flex-col h-full w-full overflow-hidden bg-[#0c0c12]">
       {/* AdSense Banner at the Very Top */}
       <AdBanner />
 
